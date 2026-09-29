@@ -104,11 +104,11 @@ function createNavigationUrl(start, destination, fromCurrentLocation = false) {
   return `https://www.google.com/maps/dir/?${parameters}`;
 }
 
-async function renderGoogleMap(start, stops) {
+async function renderGoogleMap(start, stops, container = document.querySelector("#google-map")) {
   await loadGoogleMaps();
   const { Map: GoogleMap } = await google.maps.importLibrary("maps");
   const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
-  const map = new GoogleMap(document.querySelector("#google-map"), {
+  const map = new GoogleMap(container, {
     center: { lat: start.lat, lng: start.lng }, zoom: 14,
     mapId: window.appConfig.googleMapId || "DEMO_MAP_ID",
     streetViewControl: false, mapTypeControl: false
@@ -118,8 +118,10 @@ async function renderGoogleMap(start, stops) {
   [start, ...stops].forEach((point, index) => {
     const key = `${point.lat},${point.lng}`;
     if (!groups.has(key)) groups.set(key, { point, labels: [], addresses: [] });
-    groups.get(key).labels.push(index ? String(index) : "출발");
-    groups.get(key).addresses.push(point.address);
+    // 지도 배열 위치가 아닌 방문 목록의 순서 번호를 우선 사용합니다.
+    const label = index ? String(point.order ?? index) : "출발";
+    groups.get(key).labels.push(label);
+    groups.get(key).addresses.push(`${index ? `${label}번 방문` : "출발"} · ${point.address}`);
   });
   groups.forEach(({ point, labels, addresses }) => {
     const position = { lat: point.lat, lng: point.lng };
@@ -127,6 +129,7 @@ async function renderGoogleMap(start, stops) {
     const content = document.createElement("div");
     content.className = "google-marker";
     content.textContent = labels.join(" · ");
+    content.setAttribute("aria-label", addresses.join(", "));
     marker.append(content);
     bounds.extend(position);
   });

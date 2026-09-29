@@ -22,11 +22,11 @@ class Element {
 function environment(storage = new Map(), protocol = "http:", windowName = "") {
   const elements = new Map();
   const document = { querySelector(selector) { if (!elements.has(selector)) elements.set(selector, new Element()); return elements.get(selector); }, createElement: tag => new Element(tag), createElementNS: (_, tag) => new Element(tag), head: new Element("head") };
-  const context = vm.createContext({ document, location: { protocol, href: "" }, name: windowName, isSecureContext: true, navigator: {}, addEventListener() {}, URLSearchParams, setTimeout, clearTimeout, sessionStorage: { getItem: key => storage.get(key) || null, setItem: (key, value) => storage.set(key, value) } });
+  const context = vm.createContext({ document, location: { protocol, href: "" }, name: windowName, isSecureContext: true, navigator: {}, addEventListener() {}, URL, URLSearchParams, setTimeout, clearTimeout, sessionStorage: { getItem: key => storage.get(key) || null, setItem: (key, value) => storage.set(key, value) } });
   context.window = context;
   const run = source => vm.runInContext(source, context);
   const load = file => run(fs.readFileSync(path.join(root, file), "utf8"));
-  ["js/mock-data.js", "js/common.js", "js/config.js", "js/google-maps.js"].forEach(load);
+  ["js/mock-data.js", "js/common.js", "js/config.js", "js/google-maps.js", "js/overview.js"].forEach(load);
   return { context, elements, document, run, load, storage };
 }
 
@@ -87,7 +87,41 @@ async function main() {
   await check("corrupt session handled", () => { const corrupt = environment(new Map([["today-route-trip", "broken"]])); assert.equal(corrupt.run("readTrip()"), null); });
   await check("malformed live coordinates rejected", () => assert.equal(live.run("isValidTrip({mode:'live',start:'x',addresses:['y'],startLocation:{address:'x',lat:37,lng:127},locations:[{address:'y',lat:200,lng:127}]})"), false));
   await check("file-open fallback preserves trip across pages", async () => { const file = environment(new Map(), "file:"); file.run("sessionStorage.setItem=()=>{throw Error('blocked')}"); file.load("js/main.js"); file.run("startInput.value='origin';customersInput.value='target'"); await file.run("submitAddresses({preventDefault(){}})"); const next = environment(new Map(), "file:", file.context.name); await next.load("js/route.js"); assert.equal(next.document.querySelector("#visit-list").children.length, 1); });
-  await check("all HTML asset references exist and IDs are unique", () => { for (const file of ["index.html", "route.html"]) { const html = fs.readFileSync(path.join(root, file), "utf8"); const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]); assert.equal(ids.length, new Set(ids).size); for (const match of html.matchAll(/(?:src|href)="([^"]+)"/g)) if (!match[1].startsWith("#")) assert.ok(fs.existsSync(path.join(root, match[1])), match[1]); } });
+  await check("all HTML asset references exist and IDs are unique", () => { for (const file of ["index.html", "route.html"]) { const html = fs.readFileSync(path.join(root, file), "utf8"); const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]); assert.equal(ids.length, new Set(ids).size); for (const match of html.matchAll(/(?:src|href)="([^"]+)"/g)) if (!match[1].startsWith("#")) assert.ok(fs.existsSync(path.join(root, match[1].split(/[?#]/)[0])), match[1]); } });
+  await check("append missing addresses keeps existing input and ignores blank lines", () => {
+    input.run("customersInput.value='existing'; document.querySelector('#additional-addresses').value=' new one \\n\\n new two '; appendAdditionalAddresses({preventDefault(){}})");
+    assert.equal(input.run("customersInput.value"), "existing\nnew one\nnew two");
+    assert.match(input.document.querySelector("#address-count").textContent, /^3/);
+  });
+  await check("empty additional address does not change input", () => {
+    input.run("document.querySelector('#additional-addresses').value='  '; appendAdditionalAddresses({preventDefault(){}})");
+    assert.equal(input.run("parseAddresses(customersInput.value).length"), 3);
+    assert.ok(input.document.querySelector("#additional-addresses-error").textContent);
+  });
+  await check("overview includes every submitted address in order", () => {
+    const url = new URL(input.run("createOverviewUrl({address:'origin'}, [{address:'one'},{address:'two'},{address:'three'}],false)"));
+    assert.equal(url.searchParams.get("origin"), "origin");
+    assert.equal(url.searchParams.get("waypoints"), "one|two");
+    assert.equal(url.searchParams.get("destination"), "three");
+  });
+  await check("overview rejects unsupported counts instead of dropping addresses", () => {
+    assert.throws(() => input.run("createOverviewUrl({address:'origin'}, Array.from({length:11},()=>({address:'stop'})),false)"));
+    assert.throws(() => input.run("createOverviewUrl({address:'origin'}, Array.from({length:5},()=>({address:'stop'})),true)"));
+    assert.throws(() => input.run("createOverviewUrl({address:'origin'}, [{address:'x'.repeat(2100)}],false)"));
+  });
+  await check("overview input button saves trip then navigates", async () => {
+    input.run("startInput.value='origin';customersInput.value='one\\ntwo'");
+    await input.run("submitAddresses({preventDefault(){}},true)");
+    assert.equal(input.context.location.href, "route.html?view=all");
+  });
+  await check("numbered Google markers use list order and accessible labels", async () => {
+    const numbered = environment();
+    const google = mockGoogle(numbered, {});
+    await numbered.run("renderGoogleMap({address:'origin',lat:37,lng:127},[{address:'stop',lat:38,lng:127,order:7}])");
+    assert.equal(google.markers[1].children[0].textContent, "7");
+    assert.match(google.markers[1].options.title, /7번 방문/);
+    assert.match(google.markers[1].children[0].attributes['aria-label'], /7번 방문/);
+  });
   console.log(`${count} checks passed. Google SDK responses were mocked; live credentials were not tested.`);
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

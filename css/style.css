@@ -150,7 +150,7 @@ dialog::backdrop { background: #20212466;  }
 .field-actions .button { padding: 8px 13px; min-height: 38px; }
 button:disabled { opacity: .6; cursor: wait; }
 #google-map { width: 100%; height: 440px; }
-.google-marker { min-width: 34px; padding: 7px 10px; border: 3px solid white; border-radius: 22px; background: var(--primary); color: var(--text); font-size: 14px; font-weight: 700; box-shadow: 0 2px 8px #20212414; text-align: center; }
+.google-marker { min-width: 44px; min-height: 44px; display: grid; place-items: center; padding: 6px 11px; border: 3px solid white; border-radius: 24px; background: var(--primary); color: var(--text); font-size: 20px; line-height: 1.3; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; box-shadow: 0 2px 8px #20212414; text-align: center; }
 .map-unavailable { min-height: 310px; display: flex; flex-direction: column; justify-content: center; padding: 32px; gap: 16px; background: var(--secondary-light); }
 .map-unavailable p { color: var(--muted); font-size: 13px; }
 .map-card .connection-notice { margin: 18px; }
@@ -239,4 +239,42 @@ input[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: var(--
   .map-heading { flex-wrap: wrap; }
   .form-footnote { font-size: 12px; line-height: 1.8; }
   .search-input-row input { font-size: 16px; }
+}
+
+/* 제목과 카드의 여유를 늘리고 주요 동작을 강조합니다. */
+h1 { font-size: 43px; line-height: 1.35; }
+.route-intro h1 { font-size: 35px; }
+.input-layout { gap: 36px; }
+.route-layout { gap: 32px; }
+.side-column { gap: 28px; }
+.card, .preview-card, .sample-card { border-radius: 22px; }
+.map-preview { width: calc(100% + 32px); margin-left: -16px; height: auto; max-height: none; }
+.button.primary { min-height: 50px; padding: 14px 22px; font-size: 15px; font-weight: 800; border: 1px solid var(--primary-dark); box-shadow: 0 2px 0 #16734C22; }
+.form-card > #submit-addresses { height: 58px; font-size: 17px; margin-top: 28px; }
+.form-card > #view-all-input { height: 50px; margin-top: 12px; font-size: 15px; border-color: var(--secondary); }
+.route-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+#add-addresses-form label { display: block; margin-bottom: 10px; font-weight: 700; }
+#add-addresses-form > .button { margin-top: 22px; }
+.overview-dialog { width: min(1000px, calc(100% - 32px)); max-height: 90vh; overflow: auto; border-radius: 22px; }
+.overview-dialog .eyebrow { margin-bottom: 5px; }
+.overview-map { height: clamp(280px, 48vh, 520px); margin: 20px 0; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--background); }
+.overview-map > .route-map { height: 100%; }
+.overview-map > .route-map > svg { height: 100%; width: 100%; max-height: none; }
+#overview-google-link { margin-top: 20px; }
+.overview-addresses { padding-left: 25px; columns: 2; column-gap: 32px; font-size: 14px; }
+.overview-addresses li { padding: 7px 0 7px 5px; break-inside: avoid; overflow-wrap: anywhere; }
+.overview-addresses li::marker { color: var(--primary-dark); font-weight: 700; }
+@media (max-width: 850px) {
+  .input-layout { gap: 24px; }
+  .route-layout { gap: 28px; }
+}
+@media (max-width: 640px) {
+  h1 { font-size: 35px; }
+  .route-intro h1 { font-size: 30px; }
+  .input-layout, .side-column { gap: 24px; }
+  .card, .preview-card, .sample-card { border-radius: 20px; }
+  .overview-dialog { padding: 20px; }
+  .overview-addresses { columns: 1; }
+  .route-actions { justify-content: stretch; }
+  .route-actions > .button { flex: 1; padding: 12px; }
 }

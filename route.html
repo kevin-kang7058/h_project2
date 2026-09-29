@@ -11,6 +11,7 @@
   <script src="js/common.js" defer></script>
   <script src="js/config.js" defer></script>
   <script src="js/google-maps.js" defer></script>
+  <script src="js/overview.js" defer></script>
   <script src="js/route.js" defer></script>
 </head>
 <body>
@@ -24,6 +25,7 @@
     <div class="route-intro"><section class="page-intro"><p class="eyebrow">YOUR DAILY ROUTE</p><h1>오늘의 방문 순서가 준비됐어요.</h1><p>출발지에서 가까운 고객부터 차례로 확인하세요.</p></section><a class="button secondary" href="index.html">← 주소 다시 입력하기</a></div>
     <section id="empty-state" class="card empty-state" hidden><span class="empty-icon">◎</span><h2>먼저 방문할 주소를 입력해 주세요.</h2><p id="empty-message">입력된 방문 정보가 없어요.</p><a class="button primary" href="index.html">주소 입력하러 가기 →</a></section>
     <div id="route-content" hidden>
+      <div class="route-actions"><a class="button secondary" href="index.html?add=1">＋ 누락 주소 추가</a><button id="view-all-addresses" class="button primary" type="button">◎ 한번에 보기</button></div>
       <section class="start-summary"><span class="start-symbol">◎</span><div><span class="small-label">출발 위치</span><p id="start-label"></p></div><span class="summary-count">방문 고객 <strong id="route-count"></strong>명</span></section>
       <div class="route-layout">
         <section class="card map-card" aria-labelledby="map-title">
@@ -41,5 +43,12 @@
   </main>
   <footer class="site-footer"><span>오늘의 동선</span><span>당신의 하루에, 더 나은 순서.</span></footer>
   <dialog id="navigation-dialog" aria-labelledby="navigation-title"><div class="dialog-icon">↗</div><h2 id="navigation-title">체험용 가상 주소예요</h2><p>선택한 샘플 주소</p><p class="destination-address" id="navigation-address"></p><p class="dialog-note">실제 길찾기를 이용하려면 주소 입력 화면에서 실제 고객 주소를 입력해 주세요.</p><form method="dialog"><button class="button primary full-width">확인</button></form></dialog>
+  <dialog id="overview-dialog" class="overview-dialog" aria-labelledby="overview-title">
+    <div class="dialog-heading"><div><p class="eyebrow">ALL VISITS</p><h2 id="overview-title">입력 주소 한번에 보기</h2></div><form method="dialog"><button class="button secondary">닫기</button></form></div>
+    <p id="overview-status" class="field-help" role="status"></p>
+    <div id="overview-map" class="overview-map" hidden></div>
+    <a id="overview-google-link" class="button primary" target="_blank" rel="noopener noreferrer" hidden>Google 지도에서 전체 보기 ↗</a>
+    <ol id="overview-addresses" class="overview-addresses"></ol>
+  </dialog>
 </body>
 </html>

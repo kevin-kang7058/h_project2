@@ -159,7 +159,7 @@ async function resolveLiveTrip(start, addresses) {
   return { mode: "live", start, addresses, startLocation, locations, usesCurrentLocation: Boolean(currentLocation) };
 }
 
-async function submitAddresses(event) {
+async function submitAddresses(event, overview = false) {
   event.preventDefault();
   if (submitting) return;
   const start = normalizeAddress(startInput.value);
@@ -184,7 +184,7 @@ async function submitAddresses(event) {
       trip = { mode: "address", start, addresses, startLocation: currentLocation, usesCurrentLocation: Boolean(currentLocation) };
     } else trip = await resolveLiveTrip(start, addresses);
     if (!saveTrip(trip)) throw new Error("방문 정보를 전달할 수 없어요. 브라우저의 사이트 저장소 허용 설정을 확인해 주세요.");
-    window.location.href = "route.html";
+    window.location.href = overview ? "route.html?view=all" : "route.html";
   } catch (error) {
     document.querySelector("#form-error").textContent = error.message;
     setProgress("");
@@ -209,6 +209,31 @@ function restoreInputs() {
   updateAddressCount();
 }
 
+function openAdditionalAddresses() {
+  document.querySelector("#additional-addresses").value = "";
+  document.querySelector("#additional-addresses-error").textContent = "";
+  document.querySelector("#add-addresses-dialog").showModal();
+  document.querySelector("#additional-addresses").focus();
+}
+
+function appendAdditionalAddresses(event) {
+  event.preventDefault();
+  const input = document.querySelector("#additional-addresses");
+  const addresses = parseAddresses(input.value);
+  if (!addresses.length) {
+    document.querySelector("#additional-addresses-error").textContent = "추가할 주소를 최소 1개 입력해 주세요.";
+    input.focus();
+    return;
+  }
+  customersInput.value = [...parseAddresses(customersInput.value), ...addresses].join("\n");
+  updateAddressCount();
+  setFieldError(customersInput, "");
+  document.querySelector("#form-error").textContent = "";
+  setProgress(`${addresses.length}개 주소를 추가했어요. 경로 확인하기 또는 한번에 보기를 눌러 반영해 주세요.`);
+  document.querySelector("#add-addresses-dialog").close();
+  customersInput.focus();
+}
+
 renderSampleAddresses();
 restoreInputs();
 document.querySelector("#connection-notice").textContent = getGoogleSetupMessage();
@@ -223,3 +248,7 @@ document.querySelector("#address-search-dialog").addEventListener("close", () =>
 startInput.addEventListener("input", () => { resetCurrentLocation(); setFieldError(startInput, ""); });
 customersInput.addEventListener("input", () => { updateAddressCount(); setFieldError(customersInput, ""); });
 window.addEventListener("pageshow", () => { setSubmitting(false); updateAddressCount(); });
+document.querySelector("#add-addresses").addEventListener("click", openAdditionalAddresses);
+document.querySelector("#add-addresses-form").addEventListener("submit", appendAdditionalAddresses);
+document.querySelector("#view-all-input").addEventListener("click", event => submitAddresses(event, true));
+if (new URLSearchParams(location.search).get("add") === "1") openAdditionalAddresses();

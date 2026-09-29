@@ -164,6 +164,8 @@ async function initializeRoute() {
       document.querySelector("#map-error").textContent = error.message + " 방문 목록의 Google 지도 길찾기는 계속 사용할 수 있어요.";
     }
   }
+  if (new URLSearchParams(location.search).get("view") === "all") openAllAddresses();
 }
 
+document.querySelector("#view-all-addresses").addEventListener("click", () => openAllAddresses());
 initializeRoute();
