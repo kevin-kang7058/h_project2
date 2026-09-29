@@ -55,7 +55,17 @@ Google API 키가 없으면 방문 목록은 **입력 순서**입니다. 확인�
 - `assets/*.svg`: 간단한 SVG 이미지
 - `start.bat`, `tools/server.js`: 로컬 실행 도우미 (배포 시 서버 불필요)
 
-로그인·회원가입·DB는 연결하지 않았습니다. 입력 정보는 현재 탭의 sessionStorage로 전달하며, 파일로 직접 열 때만 window.name으로 보완합니다. 현재 위치와 좌표는 장기 보관하지 않습니다.
+Supabase 클라이언트 연결을 추가했습니다. 로그인·회원가입·DB 읽기 및 쓰기는 아직 구현하지 않았습니다. 입력 정보는 기존처럼 현재 탭의 sessionStorage로 전달하며, 파일로 직접 열 때만 window.name으로 보완합니다. 현재 위치와 좌표는 장기 보관하지 않습니다.
+
+## Supabase 연결
+
+- 두 화면에서 `@supabase/supabase-js` v2를 jsDelivr CDN으로 불러옵니다.
+- `js/supabase-client.js`에 제공된 Project URL과 Publishable Key로 클라이언트를 생성합니다. Secret Key는 사용하지 않습니다.
+- CDN 전역 객체는 `window.supabase`이며, 앱에서 사용하는 클라이언트는 `window.supabaseClient`입니다.
+- CDN과 연결 파일은 `defer`로 순서대로 실행됩니다. 이후 클라이언트를 사용하는 코드는 연결 파일 뒤에 배치하거나 `DOMContentLoaded` 이후 실행하세요.
+- CDN 로드에 실패하면 `window.supabaseClient`는 `null`이 됩니다. 기존 입력·지도 기능은 유지됩니다.
+- 로그인 구현 전이므로 세션 저장·자동 토큰 갱신·URL 인증 처리를 비활성화했습니다.
+- 테이블 생성이나 데이터 전송은 하지 않습니다. DB 기능은 추후 `window.supabaseClient`를 이용해 연결할 수 있습니다.
 
 기존 `PROJECT_SPEC.md`의 Mock 전용·외부 API 미연결 조건은 이번 Google 지도 연동 요청에 한해 확장했습니다. 원본 명세 파일은 유지했습니다.
 
