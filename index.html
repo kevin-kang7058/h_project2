@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#276653">
+  <title>오늘의 동선 · 고객 주소 입력</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/mock-data.js" defer></script>
+  <script src="js/common.js" defer></script>
+  <script src="js/main.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html"><img src="assets/logo.svg" alt="" width="36" height="36">오늘의 동선<span class="brand-dot">.</span></a>
+    <span class="header-caption">가까운 곳부터, 가벼운 하루로</span>
+    <span class="demo-badge"><span></span> 샘플 데이터 버전</span>
+  </header>
+  <main class="page input-page">
+    <nav class="steps" aria-label="진행 단계"><span class="current" aria-current="step"><b>1</b> 주소 입력</span><i></i><span><b>2</b> 방문 경로 확인</span></nav>
+    <section class="page-intro">
+      <p class="eyebrow">PLAN YOUR DAY</p>
+      <h1>오늘 방문할 곳,<br>한 번에 정리하세요.</h1>
+      <p>고객 주소를 모아 입력하면 출발지에서 가까운 순서로 안내해 드려요.</p>
+    </section>
+    <div class="input-layout">
+      <form id="address-form" class="card form-card" novalidate>
+        <div class="section-heading"><h2>방문 정보 입력</h2><span>필수 항목 <em>*</em></span></div>
+        <div class="field-group">
+          <label for="start-address"><span class="field-icon">◎</span> 출발 위치 <em>*</em></label>
+          <input id="start-address" name="start" type="text" list="sample-addresses" placeholder="출발할 주소를 입력해 주세요" autocomplete="off" required aria-describedby="start-help start-error">
+          <datalist id="sample-addresses"></datalist>
+          <p class="field-help" id="start-help">샘플 주소 중 하나를 출발 위치로 사용할 수 있어요.</p>
+          <p class="field-error" id="start-error" aria-live="polite"></p>
+        </div>
+        <div class="field-group customer-field">
+          <div class="label-row"><label for="customer-addresses"><span class="field-icon">≡</span> 고객 주소 <em>*</em></label><span class="count-badge" id="address-count" aria-live="polite">0개 입력됨</span></div>
+          <textarea id="customer-addresses" name="customers" rows="7" placeholder="한 줄에 하나씩 고객 주소를 입력해 주세요.&#10;&#10;제주특별자치도 제주시 예시주소 1&#10;제주특별자치도 제주시 예시주소 2" required aria-describedby="customer-help customer-error"></textarea>
+          <p class="field-help" id="customer-help">여러 주소를 한 번에 붙여 넣으세요. 빈 줄은 자동으로 제외돼요.</p>
+          <p class="field-error" id="customer-error" aria-live="polite"></p>
+        </div>
+        <p class="form-error" id="form-error" role="alert"></p>
+        <button class="button primary full-width" type="submit">경로 확인하기 <span aria-hidden="true">→</span></button>
+        <p class="form-footnote">출발 위치와 고객 위치 사이의 직선거리를 기준으로 정렬해요.</p>
+      </form>
+      <aside class="side-column">
+        <section class="preview-card">
+          <div class="preview-heading"><span class="small-label">덜 헤매고, 더 가볍게</span><h2>흩어진 방문지를<br>한눈에 확인하세요.</h2></div>
+          <img class="map-preview" src="assets/map-preview.svg" alt="출발점과 세 개의 방문지를 번호로 표시한 예시 지도" width="440" height="220">
+          <div class="preview-caption"><span class="mini-pin">↗</span><p>주소 입력부터 방문 순서 확인까지<br><strong>두 단계면 준비 끝.</strong></p></div>
+        </section>
+        <section class="sample-card">
+          <div class="sample-title"><h2>먼저 가볍게 체험해 보세요</h2><span class="small-label">DEMO</span></div>
+          <p>제주시 샘플 주소 5개와 출발지를 채워 드려요.</p>
+          <button type="button" id="fill-sample" class="button secondary full-width">샘플 주소 불러오기 <span aria-hidden="true">↗</span></button>
+          <details><summary>사용 가능한 샘플 주소 보기</summary><ul id="sample-address-list" class="sample-address-list"></ul></details>
+          <p class="sample-note">현재는 샘플 주소만 지원해요. 지도와 좌표는 시연용이며 실제 위치와 다를 수 있어요.</p>
+        </section>
+      </aside>
+    </div>
+    <div class="bottom-note"><span aria-hidden="true">◎</span> 복잡한 준비 없이, 오늘의 방문에 집중하세요.</div>
+  </main>
+  <footer class="site-footer"><span>오늘의 동선</span><span>당신의 하루에, 더 나은 순서.</span></footer>
+</body>
+</html>

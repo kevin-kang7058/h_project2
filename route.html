@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#276653">
+  <title>오늘의 동선 · 추천 방문 경로</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/mock-data.js" defer></script>
+  <script src="js/common.js" defer></script>
+  <script src="js/route.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html"><img src="assets/logo.svg" alt="" width="36" height="36">오늘의 동선<span class="brand-dot">.</span></a>
+    <span class="header-caption">가까운 곳부터, 가벼운 하루로</span>
+    <span class="demo-badge"><span></span> 샘플 데이터 버전</span>
+  </header>
+  <main class="page route-page">
+    <nav class="steps" aria-label="진행 단계"><a href="index.html" class="completed"><b>✓</b> 주소 입력</a><i></i><span class="current" aria-current="step"><b>2</b> 방문 경로 확인</span></nav>
+    <div class="route-intro"><section class="page-intro"><p class="eyebrow">YOUR DAILY ROUTE</p><h1>오늘의 방문 순서가 준비됐어요.</h1><p>출발지에서 가까운 고객부터 차례로 확인하세요.</p></section><a class="button secondary" href="index.html">← 주소 다시 입력하기</a></div>
+    <section id="empty-state" class="card empty-state" hidden><span class="empty-icon">◎</span><h2>먼저 방문할 주소를 입력해 주세요.</h2><p id="empty-message">입력된 방문 정보가 없어요.</p><a class="button primary" href="index.html">주소 입력하러 가기 →</a></section>
+    <div id="route-content" hidden>
+      <section class="start-summary"><span class="start-symbol">◎</span><div><span class="small-label">출발 위치</span><p id="start-label"></p></div><span class="summary-count">방문 고객 <strong id="route-count"></strong>명</span></section>
+      <div class="route-layout">
+        <section class="card map-card" aria-labelledby="map-title">
+          <div class="map-heading"><h2 id="map-title">한눈에 보는 방문 위치</h2><span class="subtle-badge">MOCK MAP</span></div>
+          <div class="route-map"><svg id="route-map" viewBox="0 0 680 460" role="img" aria-labelledby="map-svg-title map-svg-description"><title id="map-svg-title">고객 방문 위치 지도</title><desc id="map-svg-description">샘플 좌표를 바탕으로 출발 위치와 방문 순서 번호를 표시한 지도입니다. 상세 주소는 옆의 방문 목록에서 확인할 수 있습니다.</desc><defs><pattern id="map-grid" width="72" height="65" patternUnits="userSpaceOnUse"><rect x="7" y="7" width="58" height="51" rx="9" fill="#e5e9de"/><path d="M0 0H72M0 0V65" stroke="#fff" stroke-width="8"/></pattern></defs><rect width="680" height="460" fill="#eff0e7"/><rect width="680" height="460" fill="url(#map-grid)"/><path d="M0 0H680V70C545 45 510 120 365 65S115 120 0 88Z" fill="#d4e5e5"/><path d="M60 460Q140 330 290 340T680 170" fill="none" stroke="#fff" stroke-width="20"/><path d="M380 460Q335 240 570 75" fill="none" stroke="#fff" stroke-width="16"/><path d="M25 220Q150 120 225 230T470 295T680 370" fill="none" stroke="#f9faf4" stroke-width="13"/><path d="M40 300Q25 245 80 244L149 282L122 346L61 354Z" fill="#cddfc4"/><path d="M500 110L605 113L630 175L530 199L493 160Z" fill="#cddfc4"/><text x="30" y="36" fill="#749496" font-size="12" letter-spacing="5">JEJU · SAMPLE MAP</text><g id="map-markers"></g></svg><span class="map-north" aria-hidden="true">N<br>↑</span></div>
+          <div class="map-legend"><span><i class="legend-start"></i> 출발 위치</span><span><i class="legend-stop"></i> 방문 순서</span><span>좌표 기반 예시 지도</span></div>
+        </section>
+        <section class="card visit-card" aria-labelledby="visit-title"><div class="visit-heading"><div><h2 id="visit-title">추천 방문 순서</h2><p>출발지에서 가까운 순서</p></div><span class="small-label">START → VISIT</span></div><ol id="visit-list" class="visit-list"></ol></section>
+      </div>
+      <div class="route-notice"><span aria-hidden="true">ⓘ</span><p>Mock 좌표로 계산한 출발지 기준 직선거리예요. 실제 도로의 이동거리·교통정보는 반영하지 않아요.<br>길찾기는 연결 준비 단계이며, 현재 외부 지도나 내비게이션을 실행하지 않아요.</p></div>
+    </div>
+  </main>
+  <footer class="site-footer"><span>오늘의 동선</span><span>당신의 하루에, 더 나은 순서.</span></footer>
+  <dialog id="navigation-dialog" aria-labelledby="navigation-title"><div class="dialog-icon">↗</div><h2 id="navigation-title">길찾기 연결 준비 중이에요</h2><p>선택한 목적지를 확인해 주세요.</p><p class="destination-address" id="navigation-address"></p><p class="dialog-note">첫 번째 버전에서는 길찾기 버튼의 동작만 제공해요. 카카오맵 또는 내비게이션 연결은 추후 지원할 예정이에요.</p><form method="dialog"><button class="button primary full-width">확인</button></form></dialog>
+</body>
+</html>
