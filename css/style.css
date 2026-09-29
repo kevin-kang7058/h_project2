@@ -283,6 +283,16 @@ h1 { font-size: 43px; line-height: 1.35; }
 body[data-auth-state="checking"] > main { display: none; }
 .auth-status { width: min(520px, calc(100% - 40px)); margin: 64px auto; padding: 28px; text-align: center; }
 .auth-status .button { margin-top: 20px; }
+.excel-dialog { width: min(680px, calc(100% - 32px)); max-height: 90vh; overflow: auto; }
+.excel-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 22px 0; }
+.excel-fields label { min-width: 0; font-size: 13px; font-weight: 700; }
+.excel-fields select { width: 100%; margin-top: 8px; min-height: 46px; padding: 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--white); color: var(--text); font: inherit; }
+.excel-fields input { margin-top: 8px; }
+.excel-preview { padding-left: 25px; max-height: 200px; overflow: auto; font-size: 14px; }
+.excel-preview li { padding: 6px 0; overflow-wrap: anywhere; }
+#excel-file-name { overflow-wrap: anywhere; }
+#confirm-excel { margin-top: 18px; }
+@media (max-width: 640px) { .excel-fields { grid-template-columns: 1fr; gap: 12px; } .excel-fields select { font-size: 16px; } }
 .auth-page { max-width: 460px; margin: 0 auto; padding: 20px 0 64px; min-height: calc(100vh - 177px); }
 .auth-page .page-intro { margin: 30px 0; }
 .auth-page h1 { font-size: 36px; }

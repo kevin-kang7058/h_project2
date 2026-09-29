@@ -15,6 +15,7 @@
   <script src="js/supabase-client.js" defer></script>
   <script src="js/auth.js" defer></script>
   <script src="js/main.js" defer></script>
+  <script src="js/excel-import.js" defer></script>
 </head>
 <body data-auth-required data-auth-state="checking">
   <header class="site-header">
@@ -47,7 +48,9 @@
         <div class="field-group customer-field">
           <div class="label-row"><label for="customer-addresses"><span class="field-icon">≡</span> 고객 주소 <em>*</em></label><span class="count-badge" id="address-count" aria-live="polite">0개 입력됨</span></div>
           <textarea id="customer-addresses" name="customers" rows="7" placeholder="한 줄에 하나씩 실제 고객 주소를 입력해 주세요.&#10;&#10;여러 주소를 한 번에 붙여 넣을 수 있어요." required aria-describedby="customer-help customer-error"></textarea>
-          <div class="field-actions"><button id="search-customer" class="button secondary" type="button">주소 검색해서 추가</button><button id="add-addresses" class="button secondary" type="button">＋ 누락 주소 추가</button></div>
+          <div class="field-actions"><button id="search-customer" class="button secondary" type="button">주소 검색해서 추가</button><button id="add-addresses" class="button secondary" type="button">＋ 누락 주소 추가</button><button id="import-excel" class="button secondary" type="button">↑ 엑셀 파일 불러오기</button></div>
+          <input id="excel-file" type="file" accept=".xlsx,.xls" hidden aria-label="주소 목록 엑셀 파일 선택">
+          <p id="excel-status" class="field-help" role="status"></p><p id="excel-error" class="field-error" role="alert"></p>
           <p class="field-help" id="customer-help">여러 주소를 한 번에 붙여 넣으세요. 빈 줄은 자동으로 제외돼요.</p>
           <p class="field-error" id="customer-error" aria-live="polite"></p>
         </div>
@@ -93,6 +96,21 @@
       <p id="additional-addresses-error" class="field-error" role="alert"></p>
       <button class="button primary full-width" type="submit">입력 목록에 추가하기 ＋</button>
     </form>
+  </dialog>
+  <dialog id="excel-dialog" class="excel-dialog" aria-labelledby="excel-title">
+    <div class="dialog-heading"><h2 id="excel-title">엑셀 주소 불러오기</h2><form method="dialog"><button class="button secondary">닫기</button></form></div>
+    <p id="excel-file-name" class="field-help"></p>
+    <p class="field-help">주소 열과 시작 행, 미리보기를 확인해 주세요. 파일은 서버에 업로드하지 않고 이 브라우저에서만 읽어요.</p>
+    <div class="excel-fields">
+      <label>시트<select id="excel-sheet"></select></label>
+      <label>주소가 있는 열<select id="excel-column"></select></label>
+      <label>상세주소 열 (선택)<select id="excel-detail-column"></select></label>
+      <label>주소 시작 행<input id="excel-start-row" type="number" min="1" step="1" value="2"></label>
+    </div>
+    <p id="excel-preview-count" role="status"></p>
+    <ol id="excel-preview" class="excel-preview"></ol>
+    <p id="excel-preview-error" class="field-error" role="alert"></p>
+    <button id="confirm-excel" class="button primary full-width" type="button">고객 주소에 추가하기</button>
   </dialog>
   <noscript><p class="connection-notice">주소 입력과 경로 확인을 사용하려면 브라우저에서 JavaScript를 허용해 주세요.</p></noscript>
 </body>

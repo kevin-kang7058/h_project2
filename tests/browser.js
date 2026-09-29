@@ -160,6 +160,61 @@ async function run() {
   await waitFor("document.body.dataset.authPage === 'signup' && document.body.dataset.authState === 'anonymous'");
   await evaluate("document.querySelector('#auth-email').value='auto@example.com'; document.querySelector('#auth-password').value='Correct#123'; document.querySelector('#auth-submit').click()");
   await waitFor("location.pathname === '/index.html' && document.body.dataset.authState === 'authenticated'");
+  // 실제 Excel 파서와 파일 선택 입력으로 .xlsx/.xls를 읽습니다.
+  await evaluate("loadExcelLibrary().catch(error => { window.excelTestError = error.message; }); true");
+  await waitFor("Boolean(window.XLSX || window.excelTestError)");
+  assert.equal(await evaluate("window.excelTestError || ''"), "");
+  async function makeExcel(name, sheets, bookType) {
+    const bytes = await evaluate(`(() => {
+      const book = XLSX.utils.book_new();
+      for (const [name, rows] of ${JSON.stringify(sheets)}) XLSX.utils.book_append_sheet(book, XLSX.utils.aoa_to_sheet(rows), name);
+      return Array.from(new Uint8Array(XLSX.write(book, {type:'array', bookType:${JSON.stringify(bookType)}})));
+    })()`);
+    const file = path.join(profile, name);
+    await fs.writeFile(file, Buffer.from(bytes));
+    return file;
+  }
+  async function chooseExcel(file) {
+    const { root: doc } = await page("DOM.getDocument");
+    const { nodeId } = await page("DOM.querySelector", { nodeId: doc.nodeId, selector: "#excel-file" });
+    await page("DOM.setFileInputFiles", { nodeId, files: [file] });
+  }
+  const xlsxFile = await makeExcel('addresses.xlsx', [
+    ['안내', [['고객 목록 안내']]],
+    ['고객', [['방문 목록'], ['이름', '고객주소', '상세주소'], ['가', '서울 중구 세종대로 110', '101호'], [], ['나', '서울 종로구 사직로 161', '202호']]]
+  ], 'xlsx');
+  await evaluate("document.querySelector('#customer-addresses').value='기존 주소'; updateAddressCount()");
+  await chooseExcel(xlsxFile);
+  await waitFor("document.querySelector('#excel-dialog').open");
+  assert.equal(await evaluate("document.querySelector('#excel-sheet').value"), '고객');
+  assert.equal(await evaluate("document.querySelector('#excel-column').value"), '1');
+  assert.equal(await evaluate("document.querySelector('#excel-start-row').value"), '3');
+  assert.deepEqual(await evaluate("selectedExcelAddresses()"), ['서울 중구 세종대로 110 101호', '서울 종로구 사직로 161 202호']);
+  assert.equal(await evaluate("document.documentElement.scrollWidth <= window.innerWidth && document.querySelector('#excel-dialog').scrollWidth <= document.querySelector('#excel-dialog').clientWidth"), true);
+  await evaluate("document.querySelector('#confirm-excel').click()");
+  assert.equal(await evaluate("document.querySelector('#customer-addresses').value"), '기존 주소\n서울 중구 세종대로 110 101호\n서울 종로구 사직로 161 202호');
+  assert.equal(await evaluate("document.querySelector('#address-count').textContent"), '3개 입력됨');
+  const xlsFile = await makeExcel('legacy.xls', [['목록', [['가', '부산 중구 중앙대로 100'], ['나', '부산 중구 중앙대로 100']]]], 'xls');
+  await chooseExcel(xlsFile);
+  await waitFor("document.querySelector('#excel-dialog').open");
+  assert.equal(await evaluate("document.querySelector('#excel-start-row').value"), '1');
+  assert.deepEqual(await evaluate("selectedExcelAddresses()"), ['부산 중구 중앙대로 100', '부산 중구 중앙대로 100']);
+  await evaluate("document.querySelector('#confirm-excel').click()");
+  assert.equal(await evaluate("parseAddresses(document.querySelector('#customer-addresses').value).length"), 5);
+  await chooseExcel(xlsFile);
+  await waitFor("document.querySelector('#excel-dialog').open");
+  await evaluate("document.querySelector('#excel-column').value='0'; document.querySelector('#excel-start-row').value=2; updateExcelPreview()");
+  assert.deepEqual(await evaluate("selectedExcelAddresses()"), ['나']);
+  await evaluate("document.querySelector('#excel-start-row').value=99; updateExcelPreview()");
+  assert.equal(await evaluate("document.querySelector('#confirm-excel').disabled"), true);
+  await evaluate("document.querySelector('#excel-dialog').close()");
+  const brokenFile = path.join(profile, 'broken.xlsx');
+  await fs.writeFile(brokenFile, 'not an Excel file');
+  await chooseExcel(brokenFile);
+  await waitFor("document.querySelector('#excel-error').textContent.length > 0");
+  assert.equal(await evaluate("parseAddresses(document.querySelector('#customer-addresses').value).length"), 5);
+  assert.equal(await evaluate("document.querySelector('#excel-dialog').open"), false);
+  console.log('PASS Excel: real XLSX/XLS parsing, file selection, sheet/header detection, details, blanks, duplicates, append/count, manual selection, reselect, cancel, corrupt file, mobile dialog.');
   // 다른 탭에서 변경된 세션을 storage 이벤트를 통해 자동 반영하는지 확인합니다.
   const second = await send("Target.createTarget", { url: "about:blank" });
   const attached = await send("Target.attachToTarget", { targetId: second.targetId, flatten: true });
