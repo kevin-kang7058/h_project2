@@ -137,6 +137,27 @@ summary { padding: 3px 0; }
 dialog { width: min(440px, calc(100% - 32px)); border: 1px solid var(--line); border-radius: 18px; padding: 28px; color: var(--ink); box-shadow: 0 20px 80px #102e292b; }
 dialog::backdrop { background: #1a2f2866; backdrop-filter: blur(3px); }
 .dialog-icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px; background: var(--green-light); color: var(--green); font-size: 24px; margin-bottom: 17px; }
+/* 실제 주소 검색과 Google 지도 */
+.connection-notice { margin: 0 0 22px; padding: 15px 18px; border: 1px solid #e0d9b8; border-radius: 10px; background: #fbf8e9; color: #716439; font-size: 12px; overflow-wrap: anywhere; }
+.connection-notice:empty { display: none; }
+.field-actions { display: flex; gap: 8px; margin-top: 9px; flex-wrap: wrap; }
+.field-actions .button { padding: 8px 13px; min-height: 38px; }
+button:disabled { opacity: .6; cursor: wait; }
+#google-map { width: 100%; height: 440px; }
+.google-marker { min-width: 34px; padding: 7px 10px; border: 3px solid white; border-radius: 22px; background: var(--green); color: white; font-size: 14px; font-weight: 700; box-shadow: 0 2px 8px #253b3344; text-align: center; }
+.map-unavailable { min-height: 310px; display: flex; flex-direction: column; justify-content: center; padding: 32px; gap: 16px; background: #f1f5ec; }
+.map-unavailable p { color: var(--muted); font-size: 13px; }
+.map-card .connection-notice { margin: 18px; }
+.visit-actions { display: flex; flex-direction: column; align-items: center; gap: 8px; flex-shrink: 0; }
+.current-directions { font-size: 10px; color: var(--green); text-decoration: underline; text-underline-offset: 3px; padding: 4px 0; }
+.dialog-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.search-input-row { display: flex; gap: 8px; margin-top: 7px; }
+.search-input-row input { min-width: 0; }
+.search-input-row .button { flex-shrink: 0; }
+.search-results { list-style: none; padding: 0; margin: 16px 0; max-height: 280px; overflow: auto; }
+.search-result-button { display: block; text-align: left; width: 100%; border: 1px solid var(--line); background: #f7faf3; color: var(--ink); padding: 15px; border-radius: 8px; margin-bottom: 8px; overflow-wrap: anywhere; }
+.search-result-button:hover { background: #eaf1e4; }
+.google-attribution { text-align: right; font-family: Arial, sans-serif; font-size: 13px; color: #5f6368; letter-spacing: 0; }
 dialog > p { font-size: 12px; color: var(--muted); margin-top: 12px; }
 dialog .destination-address { padding: 16px; background: #f3f6ee; color: var(--ink); border-radius: 8px; overflow-wrap: anywhere; }
 dialog .dialog-note { font-size: 11px; line-height: 1.85; margin: 15px 0 23px; }

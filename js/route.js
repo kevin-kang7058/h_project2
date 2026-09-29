@@ -10,10 +10,14 @@ function calculateDistance(start, destination) {
 }
 
 function buildRoute(trip) {
-  const start = findLocation(trip.start);
-  if (!start || trip.addresses.some(address => !findLocation(address))) return null;
-  const stops = trip.addresses.map(address => {
-    const location = findLocation(address);
+  if (trip.mode === "address") return {
+    start: trip.startLocation || { address: trip.start },
+    stops: trip.addresses.map((address, index) => ({ address, order: index + 1 }))
+  };
+  const start = trip.mode === "live" ? trip.startLocation : findLocation(trip.start);
+  const locations = trip.mode === "live" ? trip.locations : trip.addresses.map(findLocation);
+  if (!start || locations.some(point => !point)) return null;
+  const stops = locations.map(location => {
     return { ...location, distance: calculateDistance(start, location) };
   }).sort((first, second) => first.distance - second.distance)
     .map((stop, index) => ({ ...stop, order: index + 1 }));
@@ -25,12 +29,12 @@ function formatDistance(distance) {
 }
 
 function openNavigation(stop) {
-  // 외부 내비게이션 연결 방식이 결정되면 이 함수를 수정하세요.
+  // 가상 주소를 실제 목적지로 잘못 안내하지 않습니다.
   document.querySelector("#navigation-address").textContent = stop.address;
   document.querySelector("#navigation-dialog").showModal();
 }
 
-function renderVisitList(stops) {
+function renderVisitList(stops, start, mode) {
   const list = document.querySelector("#visit-list");
   list.replaceChildren();
   stops.forEach(stop => {
@@ -45,15 +49,32 @@ function renderVisitList(stops) {
     address.textContent = stop.address;
     const distance = document.createElement("p");
     distance.className = "visit-distance";
-    distance.textContent = `출발지에서 ${formatDistance(stop.distance)}`;
+    distance.textContent = mode === "address" ? "입력 순서 · 거리 미확인" : `출발지에서 직선 ${formatDistance(stop.distance)}`;
     details.append(address, distance);
-    const button = document.createElement("button");
-    button.type = "button";
+    const actions = document.createElement("div");
+    actions.className = "visit-actions";
+    const button = document.createElement(mode === "demo" ? "button" : "a");
     button.className = "button navigate-button";
-    button.textContent = "길찾기 ↗";
+    button.textContent = mode === "demo" ? "샘플 안내" : "길찾기 ↗";
     button.setAttribute("aria-label", `${stop.order}번째 방문지 ${stop.address} 길찾기`);
-    button.addEventListener("click", () => openNavigation(stop));
-    item.append(number, details, button);
+    if (mode === "demo") {
+      button.type = "button";
+      button.addEventListener("click", () => openNavigation(stop));
+    } else {
+      button.href = createNavigationUrl(start, stop);
+      button.target = "_blank";
+      button.rel = "noopener noreferrer";
+      const currentLink = document.createElement("a");
+      currentLink.className = "current-directions";
+      currentLink.textContent = "현위치에서 출발 ↗";
+      currentLink.setAttribute("aria-label", `현재 위치에서 ${stop.address} 길찾기`);
+      currentLink.href = createNavigationUrl(start, stop, true);
+      currentLink.target = "_blank";
+      currentLink.rel = "noopener noreferrer";
+      actions.append(currentLink);
+    }
+    actions.prepend(button);
+    item.append(number, details, actions);
     list.append(item);
   });
 }
@@ -107,16 +128,42 @@ function showEmptyState(message) {
   document.querySelector(".route-intro .page-intro > p:last-child").textContent = "주소를 입력하면 추천 방문 순서를 확인할 수 있어요.";
 }
 
-function initializeRoute() {
+async function initializeRoute() {
   const trip = readTrip();
   if (!trip) return showEmptyState("입력된 방문 정보가 없어요. 고객 주소와 출발 위치를 먼저 입력해 주세요.");
   const route = buildRoute(trip);
-  if (!route) return showEmptyState("지원하지 않는 주소가 포함되어 있어요. 입력 화면에서 샘플 주소로 변경해 주세요.");
+  if (!route) return showEmptyState("방문 정보를 확인할 수 없어요. 입력 화면에서 주소를 다시 확인해 주세요.");
+  const mode = trip.mode || "demo";
   document.querySelector("#route-content").hidden = false;
   document.querySelector("#start-label").textContent = route.start.address;
   document.querySelector("#route-count").textContent = route.stops.length;
-  renderVisitList(route.stops);
-  renderMap(route.start, route.stops);
+  renderVisitList(route.stops, route.start, mode);
+  if (mode === "demo") {
+    document.querySelector("#mock-map").hidden = false;
+    document.querySelector("#map-mode").textContent = "SAMPLE MAP";
+    document.querySelector("#route-notice-text").textContent = "샘플 좌표로 계산한 출발지 기준 직선거리예요. 실제 길찾기는 주소 입력 화면에서 실제 고객 주소를 입력해 이용해 주세요.";
+    renderMap(route.start, route.stops);
+  } else if (mode === "address") {
+    document.querySelector(".route-intro h1").textContent = "방문할 주소를 확인하세요.";
+    document.querySelector(".route-intro .page-intro > p:last-child").textContent = "각 주소의 길찾기를 눌러 Google 지도에서 경로를 확인하세요.";
+    document.querySelector("#visit-title").textContent = "방문 주소 목록";
+    document.querySelector("#visit-subtitle").textContent = "입력한 순서 · 거리순 정렬 전";
+    document.querySelector("#map-mode").textContent = "GOOGLE MAPS";
+    document.querySelector("#map-unavailable").hidden = false;
+    document.querySelector("#map-legend").hidden = true;
+    document.querySelector("#route-notice-text").textContent = "좌표를 확인하지 않은 입력 순서예요. 사이트 내 지도와 거리순 정렬은 Google API 키 설정 후 사용할 수 있어요. 길찾기는 Google 지도로 연결되며, 현위치에서 출발은 Google 지도의 위치 권한이 필요할 수 있어요.";
+  } else {
+    document.querySelector("#map-mode").textContent = "GOOGLE MAPS";
+    document.querySelector("#map-legend-caption").textContent = "Google 지도";
+    document.querySelector("#google-map").hidden = false;
+    document.querySelector("#route-notice-text").textContent = "출발지 기준 직선거리로 정렬했어요. 실제 이동 경로와 지원되는 교통수단은 Google 지도에서 확인해 주세요. 이동했다면 현위치에서 출발을 눌러 주세요.";
+    try { await renderGoogleMap(route.start, route.stops); }
+    catch (error) {
+      document.querySelector("#google-map").hidden = true;
+      document.querySelector("#map-error").hidden = false;
+      document.querySelector("#map-error").textContent = error.message + " 방문 목록의 Google 지도 길찾기는 계속 사용할 수 있어요.";
+    }
+  }
 }
 
 initializeRoute();

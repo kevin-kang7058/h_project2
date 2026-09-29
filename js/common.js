@@ -13,8 +13,19 @@ function findLocation(address) {
 }
 
 function isValidTrip(trip) {
-  return trip && typeof trip.start === "string" && Array.isArray(trip.addresses)
+  const validInput = trip && typeof trip.start === "string" && trip.start.trim() && Array.isArray(trip.addresses)
     && trip.addresses.length > 0 && trip.addresses.every(address => typeof address === "string" && address.trim());
+  if (!validInput) return false;
+  if (trip.mode === "address") return !trip.startLocation || (isValidCoordinate(trip.startLocation) && trip.startLocation.address === trip.start);
+  if (trip.mode !== "live") return !trip.mode || trip.mode === "demo";
+  return isValidCoordinate(trip.startLocation) && trip.startLocation.address === trip.start
+    && Array.isArray(trip.locations) && trip.locations.length === trip.addresses.length
+    && trip.locations.every((point, index) => isValidCoordinate(point) && point.address === trip.addresses[index]);
+}
+
+function isValidCoordinate(point) {
+  return point && Number.isFinite(point.lat) && Number.isFinite(point.lng)
+    && Math.abs(point.lat) <= 90 && Math.abs(point.lng) <= 180;
 }
 
 function saveTrip(trip) {

@@ -9,40 +9,46 @@
   <link rel="stylesheet" href="css/style.css">
   <script src="js/mock-data.js" defer></script>
   <script src="js/common.js" defer></script>
+  <script src="js/config.js" defer></script>
+  <script src="js/google-maps.js" defer></script>
   <script src="js/main.js" defer></script>
 </head>
 <body>
   <header class="site-header">
     <a class="brand" href="index.html"><img src="assets/logo.svg" alt="" width="36" height="36">오늘의 동선<span class="brand-dot">.</span></a>
     <span class="header-caption">가까운 곳부터, 가벼운 하루로</span>
-    <span class="demo-badge"><span></span> 샘플 데이터 버전</span>
+    <span class="demo-badge"><span></span> Google 지도 길찾기</span>
   </header>
   <main class="page input-page">
     <nav class="steps" aria-label="진행 단계"><span class="current" aria-current="step"><b>1</b> 주소 입력</span><i></i><span><b>2</b> 방문 경로 확인</span></nav>
     <section class="page-intro">
       <p class="eyebrow">PLAN YOUR DAY</p>
       <h1>오늘 방문할 곳,<br>한 번에 정리하세요.</h1>
-      <p>고객 주소를 모아 입력하면 출발지에서 가까운 순서로 안내해 드려요.</p>
+      <p>고객 주소를 모아 입력하고 Google 지도로 길찾기를 시작하세요.</p>
     </section>
+    <p id="connection-notice" class="connection-notice" role="status"></p>
     <div class="input-layout">
       <form id="address-form" class="card form-card" novalidate>
         <div class="section-heading"><h2>방문 정보 입력</h2><span>필수 항목 <em>*</em></span></div>
         <div class="field-group">
           <label for="start-address"><span class="field-icon">◎</span> 출발 위치 <em>*</em></label>
-          <input id="start-address" name="start" type="text" list="sample-addresses" placeholder="출발할 주소를 입력해 주세요" autocomplete="off" required aria-describedby="start-help start-error">
-          <datalist id="sample-addresses"></datalist>
-          <p class="field-help" id="start-help">샘플 주소 중 하나를 출발 위치로 사용할 수 있어요.</p>
+          <input id="start-address" name="start" type="text" placeholder="출발할 주소를 입력해 주세요" autocomplete="street-address" required aria-describedby="start-help start-error">
+          <div class="field-actions"><button id="search-start" class="button secondary" type="button">주소 검색</button><button id="use-current-location" class="button secondary" type="button">◎ 현재 위치</button></div>
+          <p class="field-help" id="start-help">출발 주소를 직접 입력하거나 현재 위치를 선택해 주세요.</p>
+          <p class="field-help" id="current-location-status" role="status"></p>
           <p class="field-error" id="start-error" aria-live="polite"></p>
         </div>
         <div class="field-group customer-field">
           <div class="label-row"><label for="customer-addresses"><span class="field-icon">≡</span> 고객 주소 <em>*</em></label><span class="count-badge" id="address-count" aria-live="polite">0개 입력됨</span></div>
-          <textarea id="customer-addresses" name="customers" rows="7" placeholder="한 줄에 하나씩 고객 주소를 입력해 주세요.&#10;&#10;제주특별자치도 제주시 예시주소 1&#10;제주특별자치도 제주시 예시주소 2" required aria-describedby="customer-help customer-error"></textarea>
+          <textarea id="customer-addresses" name="customers" rows="7" placeholder="한 줄에 하나씩 실제 고객 주소를 입력해 주세요.&#10;&#10;여러 주소를 한 번에 붙여 넣을 수 있어요." required aria-describedby="customer-help customer-error"></textarea>
+          <div class="field-actions"><button id="search-customer" class="button secondary" type="button">주소 검색해서 추가</button></div>
           <p class="field-help" id="customer-help">여러 주소를 한 번에 붙여 넣으세요. 빈 줄은 자동으로 제외돼요.</p>
           <p class="field-error" id="customer-error" aria-live="polite"></p>
         </div>
         <p class="form-error" id="form-error" role="alert"></p>
-        <button class="button primary full-width" type="submit">경로 확인하기 <span aria-hidden="true">→</span></button>
-        <p class="form-footnote">출발 위치와 고객 위치 사이의 직선거리를 기준으로 정렬해요.</p>
+        <p class="field-help" id="form-status" role="status"></p>
+        <button id="submit-addresses" class="button primary full-width" type="submit">경로 확인하기 <span aria-hidden="true">→</span></button>
+        <p class="form-footnote">좌표가 확인되면 출발지 기준 직선거리로 정렬해요. 실제 길찾기는 Google 지도에서 제공해요.</p>
       </form>
       <aside class="side-column">
         <section class="preview-card">
@@ -55,12 +61,22 @@
           <p>제주시 샘플 주소 5개와 출발지를 채워 드려요.</p>
           <button type="button" id="fill-sample" class="button secondary full-width">샘플 주소 불러오기 <span aria-hidden="true">↗</span></button>
           <details><summary>사용 가능한 샘플 주소 보기</summary><ul id="sample-address-list" class="sample-address-list"></ul></details>
-          <p class="sample-note">현재는 샘플 주소만 지원해요. 지도와 좌표는 시연용이며 실제 위치와 다를 수 있어요.</p>
+          <p class="sample-note">샘플은 화면 체험용 가상 주소예요. 실제 길찾기를 이용하려면 실제 주소를 입력해 주세요.</p>
         </section>
       </aside>
     </div>
     <div class="bottom-note"><span aria-hidden="true">◎</span> 복잡한 준비 없이, 오늘의 방문에 집중하세요.</div>
   </main>
   <footer class="site-footer"><span>오늘의 동선</span><span>당신의 하루에, 더 나은 순서.</span></footer>
+  <dialog id="address-search-dialog" aria-labelledby="address-search-title">
+    <div class="dialog-heading"><h2 id="address-search-title">주소 검색</h2><form method="dialog"><button class="button secondary" aria-label="주소 검색 닫기">닫기</button></form></div>
+    <form id="search-form"><label for="search-query">도로명 주소 또는 장소</label><div class="search-input-row"><input id="search-query" type="text" placeholder="예: 서울특별시 중구 세종대로 110"><button class="button primary" type="submit">검색</button></div></form>
+    <p id="search-status" role="status"></p>
+    <ul id="search-results" class="search-results"></ul>
+    <a id="external-search" class="button secondary full-width" target="_blank" rel="noopener noreferrer" hidden>Google 지도에서 검색하기 ↗</a>
+    <p class="field-help">외부 지도에서 찾은 주소는 입력란에 붙여 넣어 주세요.</p>
+    <p class="google-attribution">Google Maps</p>
+  </dialog>
+  <noscript><p class="connection-notice">주소 입력과 경로 확인을 사용하려면 브라우저에서 JavaScript를 허용해 주세요.</p></noscript>
 </body>
 </html>

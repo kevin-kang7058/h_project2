@@ -9,13 +9,15 @@
   <link rel="stylesheet" href="css/style.css">
   <script src="js/mock-data.js" defer></script>
   <script src="js/common.js" defer></script>
+  <script src="js/config.js" defer></script>
+  <script src="js/google-maps.js" defer></script>
   <script src="js/route.js" defer></script>
 </head>
 <body>
   <header class="site-header">
     <a class="brand" href="index.html"><img src="assets/logo.svg" alt="" width="36" height="36">오늘의 동선<span class="brand-dot">.</span></a>
     <span class="header-caption">가까운 곳부터, 가벼운 하루로</span>
-    <span class="demo-badge"><span></span> 샘플 데이터 버전</span>
+    <span class="demo-badge"><span></span> Google 지도 길찾기</span>
   </header>
   <main class="page route-page">
     <nav class="steps" aria-label="진행 단계"><a href="index.html" class="completed"><b>✓</b> 주소 입력</a><i></i><span class="current" aria-current="step"><b>2</b> 방문 경로 확인</span></nav>
@@ -25,16 +27,19 @@
       <section class="start-summary"><span class="start-symbol">◎</span><div><span class="small-label">출발 위치</span><p id="start-label"></p></div><span class="summary-count">방문 고객 <strong id="route-count"></strong>명</span></section>
       <div class="route-layout">
         <section class="card map-card" aria-labelledby="map-title">
-          <div class="map-heading"><h2 id="map-title">한눈에 보는 방문 위치</h2><span class="subtle-badge">MOCK MAP</span></div>
-          <div class="route-map"><svg id="route-map" viewBox="0 0 680 460" role="img" aria-labelledby="map-svg-title map-svg-description"><title id="map-svg-title">고객 방문 위치 지도</title><desc id="map-svg-description">샘플 좌표를 바탕으로 출발 위치와 방문 순서 번호를 표시한 지도입니다. 상세 주소는 옆의 방문 목록에서 확인할 수 있습니다.</desc><defs><pattern id="map-grid" width="72" height="65" patternUnits="userSpaceOnUse"><rect x="7" y="7" width="58" height="51" rx="9" fill="#e5e9de"/><path d="M0 0H72M0 0V65" stroke="#fff" stroke-width="8"/></pattern></defs><rect width="680" height="460" fill="#eff0e7"/><rect width="680" height="460" fill="url(#map-grid)"/><path d="M0 0H680V70C545 45 510 120 365 65S115 120 0 88Z" fill="#d4e5e5"/><path d="M60 460Q140 330 290 340T680 170" fill="none" stroke="#fff" stroke-width="20"/><path d="M380 460Q335 240 570 75" fill="none" stroke="#fff" stroke-width="16"/><path d="M25 220Q150 120 225 230T470 295T680 370" fill="none" stroke="#f9faf4" stroke-width="13"/><path d="M40 300Q25 245 80 244L149 282L122 346L61 354Z" fill="#cddfc4"/><path d="M500 110L605 113L630 175L530 199L493 160Z" fill="#cddfc4"/><text x="30" y="36" fill="#749496" font-size="12" letter-spacing="5">JEJU · SAMPLE MAP</text><g id="map-markers"></g></svg><span class="map-north" aria-hidden="true">N<br>↑</span></div>
-          <div class="map-legend"><span><i class="legend-start"></i> 출발 위치</span><span><i class="legend-stop"></i> 방문 순서</span><span>좌표 기반 예시 지도</span></div>
+          <div class="map-heading"><h2 id="map-title">한눈에 보는 방문 위치</h2><span id="map-mode" class="subtle-badge">GOOGLE MAPS</span></div>
+          <div id="google-map" aria-label="Google 지도 방문 위치" hidden></div>
+          <div id="map-unavailable" class="map-unavailable" hidden><h2>Google 지도에서 경로를 확인하세요</h2><p>방문 목록의 길찾기를 누르면 입력한 출발지와 목적지가 Google 지도에 전달돼요.</p><p>이 화면 안에 지도와 방문 순서를 표시하려면 Google 지도 연결 설정이 필요해요.</p></div>
+          <p id="map-error" class="connection-notice" role="alert" hidden></p>
+          <div id="mock-map" class="route-map" hidden><svg id="route-map" viewBox="0 0 680 460" role="img" aria-labelledby="map-svg-title map-svg-description"><title id="map-svg-title">고객 방문 위치 지도</title><desc id="map-svg-description">샘플 좌표를 바탕으로 출발 위치와 방문 순서 번호를 표시한 지도입니다. 상세 주소는 옆의 방문 목록에서 확인할 수 있습니다.</desc><defs><pattern id="map-grid" width="72" height="65" patternUnits="userSpaceOnUse"><rect x="7" y="7" width="58" height="51" rx="9" fill="#e5e9de"/><path d="M0 0H72M0 0V65" stroke="#fff" stroke-width="8"/></pattern></defs><rect width="680" height="460" fill="#eff0e7"/><rect width="680" height="460" fill="url(#map-grid)"/><path d="M0 0H680V70C545 45 510 120 365 65S115 120 0 88Z" fill="#d4e5e5"/><path d="M60 460Q140 330 290 340T680 170" fill="none" stroke="#fff" stroke-width="20"/><path d="M380 460Q335 240 570 75" fill="none" stroke="#fff" stroke-width="16"/><path d="M25 220Q150 120 225 230T470 295T680 370" fill="none" stroke="#f9faf4" stroke-width="13"/><path d="M40 300Q25 245 80 244L149 282L122 346L61 354Z" fill="#cddfc4"/><path d="M500 110L605 113L630 175L530 199L493 160Z" fill="#cddfc4"/><text x="30" y="36" fill="#749496" font-size="12" letter-spacing="5">JEJU · SAMPLE MAP</text><g id="map-markers"></g></svg><span class="map-north" aria-hidden="true">N<br>↑</span></div>
+          <div id="map-legend" class="map-legend"><span><i class="legend-start"></i> 출발 위치</span><span><i class="legend-stop"></i> 방문 순서</span><span id="map-legend-caption">좌표 기반 예시 지도</span></div>
         </section>
-        <section class="card visit-card" aria-labelledby="visit-title"><div class="visit-heading"><div><h2 id="visit-title">추천 방문 순서</h2><p>출발지에서 가까운 순서</p></div><span class="small-label">START → VISIT</span></div><ol id="visit-list" class="visit-list"></ol></section>
+        <section class="card visit-card" aria-labelledby="visit-title"><div class="visit-heading"><div><h2 id="visit-title">추천 방문 순서</h2><p id="visit-subtitle">출발지에서 가까운 순서</p></div><span class="small-label">START → VISIT</span></div><ol id="visit-list" class="visit-list"></ol></section>
       </div>
-      <div class="route-notice"><span aria-hidden="true">ⓘ</span><p>Mock 좌표로 계산한 출발지 기준 직선거리예요. 실제 도로의 이동거리·교통정보는 반영하지 않아요.<br>길찾기는 연결 준비 단계이며, 현재 외부 지도나 내비게이션을 실행하지 않아요.</p></div>
+      <div class="route-notice"><span aria-hidden="true">ⓘ</span><p id="route-notice-text"></p></div>
     </div>
   </main>
   <footer class="site-footer"><span>오늘의 동선</span><span>당신의 하루에, 더 나은 순서.</span></footer>
-  <dialog id="navigation-dialog" aria-labelledby="navigation-title"><div class="dialog-icon">↗</div><h2 id="navigation-title">길찾기 연결 준비 중이에요</h2><p>선택한 목적지를 확인해 주세요.</p><p class="destination-address" id="navigation-address"></p><p class="dialog-note">첫 번째 버전에서는 길찾기 버튼의 동작만 제공해요. 카카오맵 또는 내비게이션 연결은 추후 지원할 예정이에요.</p><form method="dialog"><button class="button primary full-width">확인</button></form></dialog>
+  <dialog id="navigation-dialog" aria-labelledby="navigation-title"><div class="dialog-icon">↗</div><h2 id="navigation-title">체험용 가상 주소예요</h2><p>선택한 샘플 주소</p><p class="destination-address" id="navigation-address"></p><p class="dialog-note">실제 길찾기를 이용하려면 주소 입력 화면에서 실제 고객 주소를 입력해 주세요.</p><form method="dialog"><button class="button primary full-width">확인</button></form></dialog>
 </body>
 </html>
