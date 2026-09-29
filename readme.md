@@ -4,7 +4,25 @@
 
 - Windows에서 `start.bat`를 실행하고 브라우저로 `http://localhost:8080`에 접속하세요. Node.js가 필요하며 npm 설치나 빌드 과정은 없습니다.
 - Vercel에는 정적 사이트로 배포할 수 있습니다. 프레임워크는 Other, 빌드 명령은 비워 두고 루트 폴더를 배포합니다.
-- `index.html`을 직접 열어도 주소 입력·방문 목록·외부 Google 지도 길찾기·샘플 체험을 사용할 수 있습니다. 사이트 내 Google 지도와 현재 위치를 사용하려면 localhost 또는 HTTPS로 실행하세요.
+- 인증 기능을 포함해 실행하려면 localhost 또는 HTTPS로 접속하세요. `index.html`을 파일로 직접 열면 실행 방법을 안내합니다.
+
+## 이메일 회원가입·로그인
+
+- 로그인하지 않은 상태에서 메인·경로 화면에 접근하면 `login.html`로 이동합니다.
+- `signup.html`에서 이메일과 비밀번호로 가입합니다. 현재 Supabase 프로젝트는 이메일 인증이 필요한 설정입니다. 가입 후 인증 메일을 확인하세요.
+- 로그인 성공 시 기존 `index.html`로 이동합니다. 상단에 로그인 이메일과 로그아웃 버튼이 표시됩니다.
+- 새로고침 후에도 Supabase 세션을 유지하며 다른 탭의 로그인·로그아웃도 자동으로 반영합니다.
+- 로그아웃하면 로그인 화면으로 이동하고, 현재 탭의 방문 정보와 현위치 좌표를 지웁니다.
+- 비밀번호는 앱 코드에서 별도로 저장하지 않습니다. 인증 세션 저장·갱신은 Supabase SDK가 담당합니다.
+
+### Supabase에서 확인할 설정
+
+1. Authentication의 이메일 로그인과 신규 회원가입을 활성화합니다. 제공된 프로젝트는 두 설정 모두 활성화된 것을 확인했습니다.
+2. Authentication → URL Configuration → Redirect URLs에 `http://localhost:8080/login.html`을 추가합니다. 배포 후에는 실제 서비스의 `https://도메인/login.html`도 등록하세요.
+3. Site URL에는 실제 서비스 주소를 지정합니다. 로컬 개발 중에는 `http://localhost:8080`을 사용할 수 있습니다.
+4. 실제 사용자에게 인증 메일을 발송하려면 프로젝트의 이메일 발송 설정과 발송 제한을 확인하세요.
+
+계정 생성·메일 수신까지의 실제 가입 테스트는 사용자 이메일로 진행해야 합니다. 개발 중에는 실제 계정을 만들거나 메일을 발송하지 않고 인증 응답을 대체해 회원가입·로그인·로그아웃을 검증했습니다.
 
 ## 지금 사용할 수 있는 기능
 
@@ -45,6 +63,10 @@ Google API 키가 없으면 방문 목록은 **입력 순서**입니다. 확인�
 ## 수정할 파일
 
 - `index.html`, `route.html`: 입력·방문 목록 화면
+- `login.html`, `signup.html`: 로그인·회원가입 화면
+- `js/auth.js`: 세션 확인, 화면 접근, 로그인 상태 변경, 로그아웃
+- `js/auth-form.js`: 이메일 회원가입·로그인 폼과 오류 안내
+- `js/supabase-client.js`: Supabase CDN 클라이언트 초기화
 - `css/style.css`: 공통 스타일
 - `js/config.js`: Google API 키와 지도 ID
 - `js/google-maps.js`: Google 지도 로딩, 주소 검색, 좌표 변환, 현위치, 길찾기 URL
@@ -55,21 +77,30 @@ Google API 키가 없으면 방문 목록은 **입력 순서**입니다. 확인�
 - `assets/*.svg`: 간단한 SVG 이미지
 - `start.bat`, `tools/server.js`: 로컬 실행 도우미 (배포 시 서버 불필요)
 
-Supabase 클라이언트 연결을 추가했습니다. 로그인·회원가입·DB 읽기 및 쓰기는 아직 구현하지 않았습니다. 입력 정보는 기존처럼 현재 탭의 sessionStorage로 전달하며, 파일로 직접 열 때만 window.name으로 보완합니다. 현재 위치와 좌표는 장기 보관하지 않습니다.
+Supabase Auth로 이메일 회원가입·로그인·로그아웃을 구현했습니다. 방문 정보의 DB 읽기 및 쓰기는 아직 구현하지 않았습니다. 방문 정보는 기존처럼 현재 탭의 sessionStorage로 전달하며 현재 위치와 좌표는 장기 보관하지 않습니다.
 
 ## Supabase 연결
 
-- 두 화면에서 `@supabase/supabase-js` v2를 jsDelivr CDN으로 불러옵니다.
+- 네 화면에서 `@supabase/supabase-js` v2를 jsDelivr CDN으로 불러옵니다.
 - `js/supabase-client.js`에 제공된 Project URL과 Publishable Key로 클라이언트를 생성합니다. Secret Key는 사용하지 않습니다.
 - CDN 전역 객체는 `window.supabase`이며, 앱에서 사용하는 클라이언트는 `window.supabaseClient`입니다.
 - CDN과 연결 파일은 `defer`로 순서대로 실행됩니다. 이후 클라이언트를 사용하는 코드는 연결 파일 뒤에 배치하거나 `DOMContentLoaded` 이후 실행하세요.
-- CDN 로드에 실패하면 `window.supabaseClient`는 `null`이 됩니다. 기존 입력·지도 기능은 유지됩니다.
-- 로그인 구현 전이므로 세션 저장·자동 토큰 갱신·URL 인증 처리를 비활성화했습니다.
-- 테이블 생성이나 데이터 전송은 하지 않습니다. DB 기능은 추후 `window.supabaseClient`를 이용해 연결할 수 있습니다.
+- CDN 로드에 실패하면 `window.supabaseClient`는 `null`이 되고 연결 오류와 재시도 버튼을 표시합니다.
+- 세션 저장·자동 토큰 갱신·이메일 인증 링크 처리를 활성화했습니다. 기존 메인 화면 기능은 최초 세션 확인 후 초기화합니다.
+- 인증 요청만 Supabase Auth로 보냅니다. 방문 정보 테이블 생성이나 DB 데이터 전송은 하지 않습니다.
 
-기존 `PROJECT_SPEC.md`의 Mock 전용·외부 API 미연결 조건은 이번 Google 지도 연동 요청에 한해 확장했습니다. 원본 명세 파일은 유지했습니다.
+기존 `PROJECT_SPEC.md`의 Mock 전용·외부 API 미연결·로그인 미구현 조건은 후속 Google 지도 및 Supabase Auth 요청에 따라 확장했습니다. 원본 명세 파일은 유지했습니다.
+
+## 인증 검증
+
+- `node tests/browser.js`: Chrome에서 테스트용 인증 응답으로 가입·로그인·로그아웃, 세션 복원, 다른 탭의 로그아웃, 기존 주소·지도 흐름을 확인합니다.
+- `node tests/browser.js --live-auth-check`: 실제 CDN과 Supabase 비로그인 세션·공개 인증 설정을 확인합니다. 실제 계정 생성이나 메일 발송은 하지 않습니다.
+- `node tests/flows.js`: 기존 경로·주소 처리 로직을 확인합니다.
 
 ## 공식 문서
+
+- [Supabase 이메일 회원가입](https://supabase.com/docs/reference/javascript/auth-signup)
+- [Supabase 인증 리디렉션 설정](https://supabase.com/docs/guides/auth/redirect-urls)
 
 - [API 키와 결제 설정](https://developers.google.com/maps/documentation/javascript/get-api-key)
 - [주소 좌표 변환](https://developers.google.com/maps/documentation/javascript/geocoding)

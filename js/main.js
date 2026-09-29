@@ -234,21 +234,26 @@ function appendAdditionalAddresses(event) {
   customersInput.focus();
 }
 
-renderSampleAddresses();
-restoreInputs();
-document.querySelector("#connection-notice").textContent = getGoogleSetupMessage();
-addressForm.addEventListener("submit", submitAddresses);
-document.querySelector("#fill-sample").addEventListener("click", fillSample);
-document.querySelector("#use-current-location").addEventListener("click", selectCurrentLocation);
-document.querySelector("#search-start").addEventListener("click", () => openAddressSearch("start"));
-document.querySelector("#search-customer").addEventListener("click", () => openAddressSearch("customer"));
-document.querySelector("#search-form").addEventListener("submit", submitSearch);
-document.querySelector("#search-query").addEventListener("input", () => { searchRequest++; updateSearchLink(); });
-document.querySelector("#address-search-dialog").addEventListener("close", () => { searchRequest++; });
-startInput.addEventListener("input", () => { resetCurrentLocation(); setFieldError(startInput, ""); });
-customersInput.addEventListener("input", () => { updateAddressCount(); setFieldError(customersInput, ""); });
-window.addEventListener("pageshow", () => { setSubmitting(false); updateAddressCount(); });
-document.querySelector("#add-addresses").addEventListener("click", openAdditionalAddresses);
-document.querySelector("#add-addresses-form").addEventListener("submit", appendAdditionalAddresses);
-document.querySelector("#view-all-input").addEventListener("click", event => submitAddresses(event, true));
-if (new URLSearchParams(location.search).get("add") === "1") openAdditionalAddresses();
+function initializeInputScreen() {
+  renderSampleAddresses();
+  restoreInputs();
+  document.querySelector("#connection-notice").textContent = getGoogleSetupMessage();
+  addressForm.addEventListener("submit", submitAddresses);
+  document.querySelector("#fill-sample").addEventListener("click", fillSample);
+  document.querySelector("#use-current-location").addEventListener("click", selectCurrentLocation);
+  document.querySelector("#search-start").addEventListener("click", () => openAddressSearch("start"));
+  document.querySelector("#search-customer").addEventListener("click", () => openAddressSearch("customer"));
+  document.querySelector("#search-form").addEventListener("submit", submitSearch);
+  document.querySelector("#search-query").addEventListener("input", () => { searchRequest++; updateSearchLink(); });
+  document.querySelector("#address-search-dialog").addEventListener("close", () => { searchRequest++; });
+  startInput.addEventListener("input", () => { resetCurrentLocation(); setFieldError(startInput, ""); });
+  customersInput.addEventListener("input", () => { updateAddressCount(); setFieldError(customersInput, ""); });
+  window.addEventListener("pageshow", () => { setSubmitting(false); updateAddressCount(); });
+  document.querySelector("#add-addresses").addEventListener("click", openAdditionalAddresses);
+  document.querySelector("#add-addresses-form").addEventListener("submit", appendAdditionalAddresses);
+  document.querySelector("#view-all-input").addEventListener("click", event => submitAddresses(event, true));
+  if (new URLSearchParams(location.search).get("add") === "1") openAdditionalAddresses();
+}
+
+if (window.authReady) window.authReady.then(session => { if (session) initializeInputScreen(); });
+else initializeInputScreen();

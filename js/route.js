@@ -168,4 +168,5 @@ async function initializeRoute() {
 }
 
 document.querySelector("#view-all-addresses").addEventListener("click", () => openAllAddresses());
-initializeRoute();
+if (window.authReady) window.authReady.then(session => { if (session) initializeRoute(); });
+else initializeRoute();

@@ -11,16 +11,20 @@
   <script src="js/common.js" defer></script>
   <script src="js/config.js" defer></script>
   <script src="js/google-maps.js" defer></script>
-  <script src="js/main.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <script src="js/supabase-client.js" defer></script>
+  <script src="js/auth.js" defer></script>
+  <script src="js/main.js" defer></script>
 </head>
-<body>
+<body data-auth-required data-auth-state="checking">
   <header class="site-header">
     <a class="brand" href="index.html"><img src="assets/logo.svg" alt="" width="36" height="36">오늘의 동선<span class="brand-dot">.</span></a>
     <span class="header-caption">가까운 곳부터, 가벼운 하루로</span>
     <span class="demo-badge"><span></span> Google 지도 길찾기</span>
+    <div class="account-actions"><span class="account-email" data-user-email hidden></span><button class="button secondary" data-sign-out type="button" hidden>로그아웃</button></div>
   </header>
+  <section id="auth-status" class="auth-status card" aria-live="polite"><p id="auth-status-message">로그인 상태를 확인하고 있어요…</p><button id="auth-retry" class="button secondary" type="button" hidden>다시 시도</button></section>
+  <p id="account-error" class="account-error field-error" role="alert"></p>
   <main class="page input-page">
     <nav class="steps" aria-label="진행 단계"><span class="current" aria-current="step"><b>1</b> 주소 입력</span><i></i><span><b>2</b> 방문 경로 확인</span></nav>
     <section class="page-intro">

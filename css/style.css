@@ -278,3 +278,35 @@ h1 { font-size: 43px; line-height: 1.35; }
   .route-actions { justify-content: stretch; }
   .route-actions > .button { flex: 1; padding: 12px; }
 }
+
+/* 인증 상태 확인 중에는 방문 정보가 먼저 노출되지 않도록 합니다. */
+body[data-auth-state="checking"] > main { display: none; }
+.auth-status { width: min(520px, calc(100% - 40px)); margin: 64px auto; padding: 28px; text-align: center; }
+.auth-status .button { margin-top: 20px; }
+.auth-page { max-width: 460px; margin: 0 auto; padding: 20px 0 64px; min-height: calc(100vh - 177px); }
+.auth-page .page-intro { margin: 30px 0; }
+.auth-page h1 { font-size: 36px; }
+.auth-card { padding: 30px; }
+.auth-card h2 { margin-bottom: 24px; }
+.auth-card .field-group + .field-group { margin-top: 22px; }
+.auth-card .button.primary { margin-top: 24px; }
+.auth-switch { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); text-align: center; color: var(--muted); font-size: 13px; }
+.auth-switch a { margin-left: 8px; color: var(--secondary-dark); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.auth-feedback:not(:empty) { margin-top: 18px; padding: 14px; border-radius: 10px; background: var(--primary-light); color: var(--primary-dark); font-size: 13px; }
+.account-actions { display: flex; align-items: center; gap: 12px; }
+.account-actions:has([data-sign-out][hidden]) { display: none; }
+.account-email { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: var(--muted); }
+.account-actions .button { white-space: nowrap; padding: 9px 14px; }
+.account-error:not(:empty) { max-width: 1160px; margin: 20px auto 0; padding: 12px 20px; }
+@media (max-width: 1100px) { body[data-auth-required] .header-caption { display: none; } }
+@media (max-width: 640px) {
+  body[data-auth-required] .site-header { gap: 10px; }
+  body[data-auth-required] .demo-badge { display: none; }
+  .account-actions { margin-left: auto; }
+  .account-email { display: none; }
+  .account-actions .button { padding: 8px 12px; font-size: 12px; }
+  .auth-page { margin: 0 20px; }
+  .auth-page h1 { font-size: 32px; }
+  .auth-card { padding: 24px; }
+  .auth-card input { font-size: 16px; }
+}

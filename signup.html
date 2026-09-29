@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#22A06B">
+  <title>오늘의 동선 · 회원가입</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="js/supabase-client.js" defer></script>
+  <script src="js/auth.js" defer></script>
+  <script src="js/auth-form.js" defer></script>
+</head>
+<body data-auth-page="signup" data-auth-state="checking">
+  <header class="site-header"><a class="brand" href="index.html"><img src="assets/logo.svg" alt="" width="36" height="36">오늘의 동선<span class="brand-dot">.</span></a><span class="header-caption">가까운 곳부터, 가벼운 하루로</span></header>
+  <section id="auth-status" class="auth-status card" aria-live="polite"><p id="auth-status-message">로그인 상태를 확인하고 있어요…</p><button id="auth-retry" class="button secondary" type="button" hidden>다시 시도</button></section>
+  <main class="auth-page">
+    <section class="page-intro"><p class="eyebrow">START YOUR DAY</p><h1>더 가벼운 하루를<br>시작하세요.</h1><p>이메일로 가입하고 방문 순서를 한눈에 확인하세요.</p></section>
+    <section class="card auth-card">
+      <h2>이메일로 회원가입</h2>
+      <form id="auth-form" novalidate>
+        <div class="field-group"><label for="auth-email">이메일</label><input id="auth-email" name="email" type="email" autocomplete="email" placeholder="인증 메일을 받을 이메일" required></div>
+        <div class="field-group"><label for="auth-password">비밀번호</label><input id="auth-password" name="password" type="password" autocomplete="new-password" minlength="6" placeholder="6자 이상 입력해 주세요" aria-describedby="password-help" required><p id="password-help" class="field-help">영문·숫자·특수문자를 함께 사용하면 더 안전해요.</p></div>
+        <p id="auth-error" class="field-error" role="alert"></p><p id="auth-feedback" class="auth-feedback" role="status"></p>
+        <button id="auth-submit" class="button primary full-width" type="submit">회원가입하기</button>
+      </form>
+      <p class="auth-switch">이미 계정이 있으신가요? <a href="login.html">로그인</a></p>
+    </section>
+  </main>
+  <footer class="site-footer"><span>오늘의 동선</span><span>당신의 하루에, 더 나은 순서.</span></footer>
+  <noscript><p class="connection-notice">회원가입을 사용하려면 브라우저에서 JavaScript를 허용해 주세요.</p></noscript>
+</body>
+</html>
